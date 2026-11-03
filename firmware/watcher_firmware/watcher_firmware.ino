@@ -36,8 +36,7 @@ typedef struct
 
 DoorConfig doorConfig;
 
-
-// I used a mutex to prevent a race condition created when the 
+// I used a mutex to prevent a race condition created when the
 // websockets receive the data and update the door system configuration.
 SemaphpreHandle_t xDoorConfigMutex;
 
@@ -60,12 +59,12 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
         Serial.println("[WS] Connected! Joining channel...");
         // 1. You must join the explicit table topic channel once connected
         // Format: realtime:public:table_name:id=eq.device_id (or just realtime:public:table_name)
-        
-        // TODO: 
+
+        // TODO:
         // Create websocket in Supabase
         // Send update when door fully closes
         // Send update when door  fully opens
-        
+
         webSocket.sendTXT("{\"topic\":\"realtime:public:device_states\",\"event\":\"phx_join\",\"payload\":{},\"ref\":\"1\"}");
         break;
     case WStype_TEXT:
@@ -80,7 +79,7 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
             if (xSemaphreTake(xDoorConfigMutex, portMAX_DELAY) == pdTRUE)
             {
 
-                // TODO: 
+                // TODO:
                 // Create table in Supabase
                 //
                 const char *event = doc["event"]; // e.g., "postgres_changes"
@@ -90,17 +89,14 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
                     // Get the new data column values
                     JsonObject record = doc["payload"]["data"]["record"];
 
-                
                     // 3. Act on the state change
-                    if(flapRule != record["flap_rule"] || isDoorOpen != record["door_open"]){
+                    if (flapRule != record["flap_rule"] || isDoorOpen != record["door_open"])
+                    {
                         flapRule = record["flap_rule"].as<int8_t>();
                         isDoorOpen = record["door_open"].as<bool>();
 
                         updateHardwareOutputs()
                     }
-
-                    
-                    
                 }
             }
         }
@@ -196,15 +192,15 @@ void setup()
     webSocket.setReconnectInterval(5000);
 
     xDoorConfigMutex() = xSemaphoreCreateMutex();
- 
+
     xTaskCreatePinnedToCore(
-        checkUltrasonicDoorTrigger,       // Task function
-        "UltrasonicSensor",               // Debug name
-        2048,                             // Stack size (bytes)
-        NULL,                             // Parameter
-        1,                                // Priority
-        NULL,                             // Task handle
-        0                                 // Core ID
+        checkUltrasonicDoorTrigger, // Task function
+        "UltrasonicSensor",         // Debug name
+        2048,                       // Stack size (bytes)
+        NULL,                       // Parameter
+        1,                          // Priority
+        NULL,                       // Task handle
+        0                           // Core ID
     );
 }
 
@@ -223,47 +219,53 @@ void loop()
 
 void checkUltrasonicDoorTrigger()
 {
-    float distance = getDistanceCM();
-
-    if (distance <= TRIGGER_DISTANCE_CM && distance > 0)
+    // TODO: 
+    // Initialize ultrasonic sensor here
+    // How will the this thread communicate with the thread holding the websocket?
+    // .. 
+    while (1)
     {
-        Serial.printf("\n[Sensor] Object Detected! Distance: %.1f cm\n", distance);
+        float distance = getDistanceCM();
 
-        if (windowState == "unlocked")
+        if (distance <= TRIGGER_DISTANCE_CM && distance > 0)
         {
-            if (!isDoorOpen)
-            {
-                Serial.println(" -> Access Granted: Opening Door...");
-                setDoorPosition(true);
-                delay(DOOR_OPEN_TIME_MS);
+            Serial.printf("\n[Sensor] Object Detected! Distance: %.1f cm\n", distance);
 
-                Serial.println(" -> Auto-Closing Door...");
-                setDoorPosition(false);
+            if (windowState != 0)
+            {
+                if (!isDoorOpen)
+                {
+                    Serial.println(" -> Access Granted: Opening Door...");
+                    setDoorPosition(true);
+                    delay(DOOR_OPEN_TIME_MS);
+
+                    Serial.println(" -> Auto-Closing Door...");
+                    setDoorPosition(false);
+                }
             }
-        }
-        else
-        {
-            Serial.println(" -> Access Denied: System is LOCKED.");
-
-            // Access Denied Warning: Flash Red LED 3 times
-            for (int i = 0; i < 3; i++)
+            else
             {
-                digitalWrite(PIN_LOCK_LED, LOW);
-                delay(100);
+                Serial.println(" -> Access Denied: System is LOCKED.");
+
+                // Access Denied Warning: Flash Red LED 3 times
+                for (int i = 0; i < 3; i++)
+                {
+                    digitalWrite(PIN_LOCK_LED, LOW);
+                    delay(600);
+                    digitalWrite(PIN_LOCK_LED, HIGH);
+                    delay(600);
+                }
+                // Ensure Red LED returns to SOLID HIGH (Locked state)
                 digitalWrite(PIN_LOCK_LED, HIGH);
-                delay(100);
             }
-            // Ensure Red LED returns to SOLID HIGH (Locked state)
-            digitalWrite(PIN_LOCK_LED, HIGH);
         }
     }
 }
 
-
 void updateHardwareOutputs()
 {
     // 1. Red Lock Indicator LED
-    if (windowState == 0)
+    if (windowState != 0)
     {
         digitalWrite(PIN_LOCK_LED, LOW); // LED OFF = Unlocked
         Serial.println(" -> [Hardware] Red LED LOW  (Door Unlocked)");
@@ -275,14 +277,14 @@ void updateHardwareOutputs()
     }
 
     // 2. Flap Rule Outputs
-    if(flapRule = 1)
+    if (flapRule = 1)
     {
         digitalWrite(PIN_FLAP_INBOUND, HIGH);
         digitalWrite(PIN_FLAP_OUTBOUND, LOW);
         digitalWrite(PIN_FLAP_TWOWAY, LOW);
         Serial.println(" -> [Hardware] Inbound")
     }
-     else if (flapRule == 2)
+    else if (flapRule == 2)
     {
         digitalWrite(PIN_FLAP_INBOUND, LOW);
         digitalWrite(PIN_FLAP_OUTBOUND, HIGH);
