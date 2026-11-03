@@ -4,24 +4,24 @@
 #include <ArduinoJson.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
+#include <secrets.h>
 
 // WiFi Configuration
-
-const char* WIFI_SSID     = "";
-const char* WIFI_PASSWORD = "";
+//const char* const SSID = "";
+//const char* const PASSWORD = "";
 
 // Supabase Configuration
-const char* SUPABASE_URL  = "";
-const char* SUPABASE_KEY  = "";
+//const char* const SUPABASE_URL  = "";
+//const char* const SUPABASE_KEY  = "";
 
-// Hardware Pin Definitions (WROVER Safe - GPIO 16 & 17 Avoided)
+// Hardware Pin Definitions 
 const int PIN_LOCK_LED      = 4;   // Red LED: Lock Indicator
-const int PIN_FLAP_INBOUND  = 33;  // Inbound LED (Moved from 17 due to WROVER PSRAM)
+const int PIN_FLAP_INBOUND  = 33;  // Inbound LED
 const int PIN_FLAP_OUTBOUND = 23;  // Outbound LED
 const int PIN_FLAP_TWOWAY   = 25;  // Two-Way LED
 
 const int TRIG_PIN          = 5;   // Ultrasonic Sensor Trig
-const int ECHO_PIN          = 32;  // Ultrasonic Sensor Echo (Moved from 16 due to WROVER PSRAM)
+const int ECHO_PIN          = 32;  // Ultrasonic Sensor Echo 
 
 // PCA9685 Setup
 Adafruit_PWMServoDriver pca = Adafruit_PWMServoDriver(0x40);
