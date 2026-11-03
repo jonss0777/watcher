@@ -37,7 +37,7 @@ typedef struct
 DoorConfig doorConfig;
 
 
-// I use a mutex to prevent a race condition created when the 
+// I used a mutex to prevent a race condition created when the 
 // websockets receive the data and update the door system configuration.
 SemaphpreHandle_t xDoorConfigMutex;
 
@@ -275,22 +275,25 @@ void updateHardwareOutputs()
     }
 
     // 2. Flap Rule Outputs
-    if (flapRule == "two_way" || flapRule == "both")
-    {
-        digitalWrite(PIN_FLAP_INBOUND, LOW);
-        digitalWrite(PIN_FLAP_OUTBOUND, LOW);
-        digitalWrite(PIN_FLAP_TWOWAY, HIGH);
-    }
-    else if (flapRule == "outbound_only" || flapRule == "outbound")
-    {
-        digitalWrite(PIN_FLAP_INBOUND, LOW);
-        digitalWrite(PIN_FLAP_OUTBOUND, HIGH);
-        digitalWrite(PIN_FLAP_TWOWAY, LOW);
-    }
-    else
+    if(flapRule = 1)
     {
         digitalWrite(PIN_FLAP_INBOUND, HIGH);
         digitalWrite(PIN_FLAP_OUTBOUND, LOW);
         digitalWrite(PIN_FLAP_TWOWAY, LOW);
+        Serial.println(" -> [Hardware] Inbound")
+    }
+     else if (flapRule == 2)
+    {
+        digitalWrite(PIN_FLAP_INBOUND, LOW);
+        digitalWrite(PIN_FLAP_OUTBOUND, HIGH);
+        digitalWrite(PIN_FLAP_TWOWAY, LOW);
+        Serial.println(" -> [Hardware] Outbound")
+    }
+    else if (flapRule == 3)
+    {
+        digitalWrite(PIN_FLAP_INBOUND, LOW);
+        digitalWrite(PIN_FLAP_OUTBOUND, LOW);
+        digitalWrite(PIN_FLAP_TWOWAY, HIGH);
+        Serial.println(" -> [Hardware] Two way")
     }
 }
