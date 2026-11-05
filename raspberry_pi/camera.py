@@ -4,8 +4,7 @@ import requests
 import time
 from ultralytics import YOLO
 
-SUPABASE_URL = ""
-SUPABASE_KEY = ""
+
 
 headers = {
     "apikey": SUPABASE_KEY,
